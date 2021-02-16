@@ -201,7 +201,9 @@ public class PermissionResource {
                                                      final Boolean granted,
                                                      final Boolean returnNames,
                                                      final Integer firstResult,
-                                                     final Integer maxResult) {
+                                                     final Integer maxResult,
+                                                     final String orderBy,
+                                                     final Boolean desc) {
         Callable<List<PermissionTicketRepresentation>> callable = new Callable<List<PermissionTicketRepresentation>>() {
             @Override
             public List<PermissionTicketRepresentation> call() throws Exception {
@@ -215,6 +217,8 @@ public class PermissionResource {
                         .param("returnNames", returnNames == null ? null : returnNames.toString())
                         .param("first", firstResult == null ? null : firstResult.toString())
                         .param("max", maxResult == null ? null : maxResult.toString())
+                        .param("orderBy", orderBy)
+                        .param("desc", desc == null ? null : desc.toString())
                         .response().json(new TypeReference<List<PermissionTicketRepresentation>>(){}).execute();
             }
         };

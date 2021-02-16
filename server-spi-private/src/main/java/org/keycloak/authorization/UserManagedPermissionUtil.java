@@ -45,7 +45,7 @@ public class UserManagedPermissionUtil {
             filter.put(PermissionTicket.RESOURCE, ticket.getResource().getId());
             filter.put(PermissionTicket.POLICY_IS_NOT_NULL, Boolean.TRUE.toString());
 
-            List<PermissionTicket> tickets = storeFactory.getPermissionTicketStore().find(filter, ticket.getResourceServer().getId(), -1, 1);
+            List<PermissionTicket> tickets = storeFactory.getPermissionTicketStore().find(filter, ticket.getResourceServer().getId(), -1, 1, null, null);
 
             if (!tickets.isEmpty()) {
                 policy = tickets.iterator().next().getPolicy();
@@ -79,7 +79,7 @@ public class UserManagedPermissionUtil {
             filter.put(PermissionTicket.RESOURCE, ticket.getResource().getId());
             filter.put(PermissionTicket.GRANTED, Boolean.TRUE.toString());
 
-            List<PermissionTicket> tickets = storeFactory.getPermissionTicketStore().find(filter, ticket.getResourceServer().getId(), -1, -1);
+            List<PermissionTicket> tickets = storeFactory.getPermissionTicketStore().find(filter, ticket.getResourceServer().getId(), -1, -1, null, null);
 
             if (tickets.isEmpty()) {
                 PolicyStore policyStore = storeFactory.getPolicyStore();

@@ -120,7 +120,7 @@ public class AuthorizationBean {
 
             PermissionTicketStore ticketStore = authorization.getStoreFactory().getPermissionTicketStore();
 
-            userSharedResources = toResourceRepresentation(ticketStore.find(filters, null, -1, -1));
+            userSharedResources = toResourceRepresentation(ticketStore.find(filters, null, -1, -1, null, null));
         }
         return userSharedResources;
     }
@@ -315,7 +315,7 @@ public class AuthorizationBean {
 
                         filters1.put(PermissionTicket.POLICY, policy.getId());
 
-                        return authorization.getStoreFactory().getPermissionTicketStore().find(filters1, resourceServer.getId(), -1, 1)
+                        return authorization.getStoreFactory().getPermissionTicketStore().find(filters1, resourceServer.getId(), -1, 1, null, null)
                                 .isEmpty();
                     })
                     .map(ManagedPermissionBean::new).collect(Collectors.toList());
@@ -367,7 +367,7 @@ public class AuthorizationBean {
     }
 
     private List<PermissionTicket> findPermissions(Map<String, String> filters) {
-        return authorization.getStoreFactory().getPermissionTicketStore().find(filters, null, -1, -1);
+        return authorization.getStoreFactory().getPermissionTicketStore().find(filters, null, -1, -1, null, null);
     }
 
     public class ResourceServerBean {

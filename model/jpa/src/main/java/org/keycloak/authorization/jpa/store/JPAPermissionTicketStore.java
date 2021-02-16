@@ -29,6 +29,7 @@ import javax.persistence.FlushModeType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -39,8 +40,13 @@ import org.keycloak.authorization.model.Resource;
 import org.keycloak.authorization.model.ResourceServer;
 import org.keycloak.authorization.store.PermissionTicketStore;
 import org.keycloak.authorization.store.ResourceStore;
+import org.keycloak.jose.jwk.JWK;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.representations.idm.authorization.ResourceRepresentation;
+
 import javax.persistence.LockModeType;
+import javax.persistence.criteria.Subquery;
 
 import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
 
@@ -170,7 +176,7 @@ public class JPAPermissionTicketStore implements PermissionTicketStore {
     }
 
     @Override
-    public List<PermissionTicket> find(Map<String, String> attributes, String resourceServerId, int firstResult, int maxResult) {
+    public List<PermissionTicket> find(Map<String, String> attributes, String resourceServerId, int firstResult, int maxResult, String orderBy, Boolean desc) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PermissionTicketEntity> querybuilder = builder.createQuery(PermissionTicketEntity.class);
         Root<PermissionTicketEntity> root = querybuilder.from(PermissionTicketEntity.class);
@@ -219,7 +225,33 @@ public class JPAPermissionTicketStore implements PermissionTicketStore {
             }
         });
 
-        querybuilder.where(predicates.toArray(new Predicate[predicates.size()])).orderBy(builder.asc(root.get("id")));
+        querybuilder.where(predicates.toArray(new Predicate[predicates.size()]));
+        if (orderBy == null) {
+            orderBy = "";
+        }
+        switch (orderBy) {
+            case "resource_name":
+                if (desc) {
+                    querybuilder.orderBy(builder.desc(root.get("resource").get("name")));
+                    break;
+                }
+                querybuilder.orderBy(builder.asc(root.get("resource").get("name")));
+                break;
+            case "owner_name":
+                Subquery<String> subQuery = querybuilder.subquery(String.class);
+                Root<UserEntity> userQuery = subQuery.from(UserEntity.class);
+                subQuery.select(userQuery.get("username"));
+                subQuery.where(builder.equal(userQuery.get("id"), root.get("owner")));
+                if (desc) {
+                    querybuilder.orderBy(builder.desc(root.get("username")));
+                    break;
+                }
+                querybuilder.orderBy(builder.asc(root.get("username")));
+                break;
+            default:
+                querybuilder.orderBy(builder.asc(root.get("id")));
+                break;
+        }
 
         TypedQuery query = entityManager.createQuery(querybuilder);
 
@@ -244,7 +276,7 @@ public class JPAPermissionTicketStore implements PermissionTicketStore {
         filters.put(PermissionTicket.GRANTED, Boolean.TRUE.toString());
         filters.put(PermissionTicket.REQUESTER, userId);
 
-        return find(filters, resourceServerId, -1, -1);
+        return find(filters, resourceServerId, -1, -1, null, null);
     }
 
     @Override
@@ -255,18 +287,18 @@ public class JPAPermissionTicketStore implements PermissionTicketStore {
         filters.put(PermissionTicket.GRANTED, Boolean.TRUE.toString());
         filters.put(PermissionTicket.REQUESTER, userId);
 
-        return find(filters, resourceServerId, -1, -1);
+        return find(filters, resourceServerId, -1, -1, null, null);
     }
 
     @Override
     public List<Resource> findGrantedResources(String requester, String name, int first, int max) {
-        TypedQuery<String> query = name == null ? 
+        TypedQuery<String> query = name == null ?
                 entityManager.createNamedQuery("findGrantedResources", String.class) :
                 entityManager.createNamedQuery("findGrantedResourcesByName", String.class);
 
         query.setFlushMode(FlushModeType.COMMIT);
         query.setParameter("requester", requester);
-        
+
         if (name != null) {
             query.setParameter("resourceName", "%" + name.toLowerCase() + "%");
         }
@@ -282,7 +314,7 @@ public class JPAPermissionTicketStore implements PermissionTicketStore {
                 list.add(resource);
             }
         }
-        
+
         return list;
     }
 

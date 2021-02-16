@@ -146,7 +146,7 @@ public class UserManagedAccessTest extends AbstractResourceServerTest {
         } catch (AuthorizationDeniedException ade) {
         }
 
-        List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, null, null, null);
+        List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, null, null, null, null, null);
 
         for (PermissionTicketRepresentation ticket : tickets) {
             ticket.setGranted(true);
@@ -237,7 +237,7 @@ public class UserManagedAccessTest extends AbstractResourceServerTest {
 
         }
 
-        List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, null, null, null);
+        List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, null, null, null, null, null);
 
         for (PermissionTicketRepresentation ticket : tickets) {
             ticket.setGranted(true);
@@ -261,7 +261,7 @@ public class UserManagedAccessTest extends AbstractResourceServerTest {
             getAuthzClient().protection().permission().delete(ticket.getId());
         }
 
-        tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, null, null, null);
+        tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, null, null, null, null, null);
 
         assertEquals(0, tickets.size());
         try {

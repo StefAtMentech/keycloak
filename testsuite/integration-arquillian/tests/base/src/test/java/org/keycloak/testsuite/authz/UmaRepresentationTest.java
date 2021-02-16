@@ -38,7 +38,7 @@ public class UmaRepresentationTest extends AbstractResourceServerTest {
         permission = getAuthzClient().protection("marta", "password").permission();
         createPermissionTicket();
 
-        List<PermissionTicketRepresentation> permissionTickets = permission.find(resource.getId(), null, null, null, null, true, null, null);
+        List<PermissionTicketRepresentation> permissionTickets = permission.find(resource.getId(), null, null, null, null, true, null, null, null, null);
         Assert.assertFalse(permissionTickets.isEmpty());
         Assert.assertEquals(1, permissionTickets.size());
 
@@ -56,7 +56,7 @@ public class UmaRepresentationTest extends AbstractResourceServerTest {
         permission = getAuthzClient().protection().permission();
         createPermissionTicket();
 
-        List<PermissionTicketRepresentation> permissionTickets = permission.find(resource.getId(), null, null, null, null, true, null, null);
+        List<PermissionTicketRepresentation> permissionTickets = permission.find(resource.getId(), null, null, null, null, true, null, null, null, null);
         Assert.assertFalse(permissionTickets.isEmpty());
         Assert.assertEquals(1, permissionTickets.size());
 

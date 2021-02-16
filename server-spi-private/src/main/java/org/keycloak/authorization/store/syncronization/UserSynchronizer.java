@@ -116,7 +116,7 @@ public class UserSynchronizer implements Synchronizer<UserRemovedEvent> {
 
         attributes.put(PermissionTicket.OWNER, userModel.getId());
 
-        for (PermissionTicket ticket : ticketStore.find(attributes, null, -1, -1)) {
+        for (PermissionTicket ticket : ticketStore.find(attributes, null, -1, -1, null, null)) {
             ticketStore.delete(ticket.getId());
         }
 
@@ -124,7 +124,7 @@ public class UserSynchronizer implements Synchronizer<UserRemovedEvent> {
         
         attributes.put(PermissionTicket.REQUESTER, userModel.getId());
 
-        for (PermissionTicket ticket : ticketStore.find(attributes, null, -1, -1)) {
+        for (PermissionTicket ticket : ticketStore.find(attributes, null, -1, -1, null, null)) {
             ticketStore.delete(ticket.getId());
         }
     }

@@ -487,7 +487,7 @@ public class EntitlementAPITest extends AbstractAuthzTest {
 
         }
 
-        tickets = authzClient.protection().permission().find(resource.getId(), "Scope A", null, null, false, false, null, null);
+        tickets = authzClient.protection().permission().find(resource.getId(), "Scope A", null, null, false, false, null, null, null, null);
 
         assertEquals(1, tickets.size());
 

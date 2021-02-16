@@ -86,7 +86,7 @@ public class ResourceService extends AbstractResourceService {
         filters.put(PermissionTicket.GRANTED, Boolean.TRUE.toString());
         filters.put(PermissionTicket.RESOURCE, resource.getId());
 
-        Collection<ResourcePermission> resources = toPermissions(ticketStore.find(filters, null, -1, -1));
+        Collection<ResourcePermission> resources = toPermissions(ticketStore.find(filters, null, -1, -1, null, null));
         Collection<Permission> permissions = Collections.EMPTY_LIST;
         
         if (!resources.isEmpty()) {
@@ -134,7 +134,7 @@ public class ResourceService extends AbstractResourceService {
 
             filters.put(PermissionTicket.REQUESTER, user.getId());
 
-            List<PermissionTicket> tickets = ticketStore.find(filters, resource.getResourceServer(), -1, -1);
+            List<PermissionTicket> tickets = ticketStore.find(filters, resource.getResourceServer(), -1, -1, null, null);
 
             // grants all requested permissions
             if (tickets.isEmpty()) {
@@ -195,7 +195,7 @@ public class ResourceService extends AbstractResourceService {
         
         Map<String, Permission> requests = new HashMap<>();
 
-        for (PermissionTicket ticket : ticketStore.find(filters, null, -1, -1)) {
+        for (PermissionTicket ticket : ticketStore.find(filters, null, -1, -1, null, null)) {
             requests.computeIfAbsent(ticket.getRequester(), requester -> new Permission(ticket, provider)).addScope(ticket.getScope().getName());
         }
         

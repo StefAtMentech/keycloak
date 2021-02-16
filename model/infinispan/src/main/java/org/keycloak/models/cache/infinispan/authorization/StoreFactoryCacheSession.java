@@ -1188,8 +1188,8 @@ public class StoreFactoryCacheSession implements CachedStoreFactoryProvider {
         }
 
         @Override
-        public List<PermissionTicket> find(Map<String, String> attributes, String resourceServerId, int firstResult, int maxResult) {
-            return getPermissionTicketStoreDelegate().find(attributes, resourceServerId, firstResult, maxResult);
+        public List<PermissionTicket> find(Map<String, String> attributes, String resourceServerId, int firstResult, int maxResult, String orderBy, Boolean desc) {
+            return getPermissionTicketStoreDelegate().find(attributes, resourceServerId, firstResult, maxResult, orderBy, desc);
         }
 
         @Override

@@ -34,7 +34,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.keycloak.admin.client.resource.AuthorizationResource;
@@ -433,7 +435,7 @@ public class PermissionManagementTest extends AbstractResourceServerTest {
 
       // start with fetching the second half of all permission tickets
       Collection<String> expectedScopes = new ArrayList(Arrays.asList(scopes));
-      List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, true, 2, 2);
+      List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, true, 2, 2, null, null);
       assertEquals("Returned number of permissions tickets must match the specified page size (i.e., 'maxResult').", 2, tickets.size());
       boolean foundScope = expectedScopes.remove(tickets.get(0).getScopeName());
       assertTrue("Returned set of permission tickets must be only a sub-set as per pagination offset and specified page size.", foundScope);
@@ -441,11 +443,77 @@ public class PermissionManagementTest extends AbstractResourceServerTest {
       assertTrue("Returned set of permission tickets must be only a sub-set as per pagination offset and specified page size.", foundScope);
 
       // fetch the first half of all permission tickets
-      tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, true, 0, 2);
+      tickets = getAuthzClient().protection().permission().find(resource.getId(), null, null, null, null, true, 0, 2, null, null);
       assertEquals("Returned number of permissions tickets must match the specified page size (i.e., 'maxResult').", 2, tickets.size());
       foundScope = expectedScopes.remove(tickets.get(0).getScopeName());
       assertTrue("Returned set of permission tickets must be only a sub-set as per pagination offset and specified page size.", foundScope);
       foundScope = expectedScopes.remove(tickets.get(1).getScopeName());
       assertTrue("Returned set of permission tickets must be only a sub-set as per pagination offset and specified page size.", foundScope);
+    }
+
+    @Test
+    public void testFindPermissionTicketsWithOrderingByResourceName() throws Exception {
+        List<String> resources = new ArrayList<>();
+        Stream.generate(UUID::randomUUID).limit(10).map(UUID::toString).forEach(resourceName -> {
+            String[] scopes = {"ScopeA"};
+            ResourceRepresentation resource = null;
+            try {
+                resource = addResource(resourceName, "kolo", true, scopes);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            AuthzClient authzClient = getAuthzClient();
+            PermissionResponse response = authzClient.protection("marta", "password").permission().create(new PermissionRequest(resource.getId(), scopes));
+            AuthorizationRequest request = new AuthorizationRequest();
+            request.setTicket(response.getTicket());
+            request.setClaimToken(authzClient.obtainAccessToken("marta", "password").getToken());
+
+            try {
+                authzClient.authorization().authorize(request);
+            } catch (Exception e) {
+
+            }
+            resources.add(resourceName);
+        });
+
+
+        // start with fetching the second half of all permission tickets
+        List<String> expectedResourceNames = resources.stream().sorted().collect(Collectors.toList());
+        List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(null, null, null, null, null, true, -1, 100, "resource_name", false);
+        List<String> foundResourceNames = tickets.stream().map(PermissionTicketRepresentation::getResourceName).collect(Collectors.toList());
+        assertEquals("The returned collection must be alphabetically ordered by the resource name.", expectedResourceNames, foundResourceNames);
+    }
+
+    @Test
+    public void testFindPermissionTicketsWithOrderingByResourceNameDescending() throws Exception {
+        List<String> resources = new ArrayList<>();
+        Stream.generate(UUID::randomUUID).limit(10).map(UUID::toString).forEach(resourceName -> {
+            String[] scopes = {"ScopeA"};
+            ResourceRepresentation resource = null;
+            try {
+                resource = addResource(resourceName, "kolo", true, scopes);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            AuthzClient authzClient = getAuthzClient();
+            PermissionResponse response = authzClient.protection("marta", "password").permission().create(new PermissionRequest(resource.getId(), scopes));
+            AuthorizationRequest request = new AuthorizationRequest();
+            request.setTicket(response.getTicket());
+            request.setClaimToken(authzClient.obtainAccessToken("marta", "password").getToken());
+
+            try {
+                authzClient.authorization().authorize(request);
+            } catch (Exception e) {
+
+            }
+            resources.add(resourceName);
+        });
+
+
+        // start with fetching the second half of all permission tickets
+        List<String> expectedResourceNames = resources.stream().sorted(String::compareTo).collect(Collectors.toList());
+        List<PermissionTicketRepresentation> tickets = getAuthzClient().protection().permission().find(null, null, null, null, null, true, -1, 100, "resource_name", true);
+        List<String> foundResourceNames = tickets.stream().map(PermissionTicketRepresentation::getResourceName).collect(Collectors.toList());
+        assertEquals("The returned collection must be alphabetically ordered by the resource name.", expectedResourceNames, foundResourceNames);
     }
 }

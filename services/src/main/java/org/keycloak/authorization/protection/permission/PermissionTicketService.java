@@ -17,6 +17,7 @@
  */
 package org.keycloak.authorization.protection.permission;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.keycloak.OAuthErrorException;
 import org.keycloak.authorization.AuthorizationProvider;
 import org.keycloak.authorization.common.KeycloakIdentity;
@@ -121,7 +122,7 @@ public class PermissionTicketService {
         attributes.put(PermissionTicket.SCOPE, scope.getId());
         attributes.put(PermissionTicket.REQUESTER, user.getId());
         
-        if (!ticketStore.find(attributes, resourceServer.getId(), -1, -1).isEmpty())
+        if (!ticketStore.find(attributes, resourceServer.getId(), -1, -1, null, null).isEmpty())
             throw new ErrorResponseException("invalid_permission", "Permission already exists", Response.Status.BAD_REQUEST);
         
         PermissionTicket ticket = ticketStore.create(resource.getId(), scope.getId(), user.getId(), resourceServer);
@@ -186,7 +187,9 @@ public class PermissionTicketService {
                          @QueryParam("granted") Boolean granted,
                          @QueryParam("returnNames") Boolean returnNames,
                          @QueryParam("first") Integer firstResult,
-                         @QueryParam("max") Integer maxResult) {
+                         @QueryParam("max") Integer maxResult,
+                         @QueryParam("orderBy") String orderBy,
+                         @QueryParam("desc") Boolean desc) {
         StoreFactory storeFactory = authorization.getStoreFactory();
         PermissionTicketStore permissionTicketStore = storeFactory.getPermissionTicketStore();
 
@@ -219,7 +222,7 @@ public class PermissionTicketService {
             filters.put(PermissionTicket.GRANTED, granted.toString());
         }
 
-        return Response.ok().entity(permissionTicketStore.find(filters, resourceServer.getId(), firstResult != null ? firstResult : -1, maxResult != null ? maxResult : Constants.DEFAULT_MAX_RESULTS)
+        return Response.ok().entity(permissionTicketStore.find(filters, resourceServer.getId(), firstResult != null ? firstResult : -1, maxResult != null ? maxResult : Constants.DEFAULT_MAX_RESULTS, orderBy, desc)
                     .stream()
                         .map(permissionTicket -> ModelToRepresentation.toRepresentation(permissionTicket, authorization, returnNames == null ? false : returnNames))
                         .collect(Collectors.toList()))

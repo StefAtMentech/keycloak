@@ -90,7 +90,7 @@ public interface PermissionTicketStore {
      */
     List<PermissionTicket> findByScope(String scopeId, String resourceServerId);
 
-    List<PermissionTicket> find(Map<String, String> attributes, String resourceServerId, int firstResult, int maxResult);
+    List<PermissionTicket> find(Map<String, String> attributes, String resourceServerId, int firstResult, int maxResult, String orderBy, Boolean desc);
 
     /**
      * Returns a list of {@link PermissionTicket} granted to the given {@code userId}.
